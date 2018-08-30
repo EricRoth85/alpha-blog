@@ -1,42 +1,40 @@
 class MusicVenuesController < ApplicationController
 
-  def show
-    # @music_venue = MusicVenue.find(params[:id])
+  def index
+     # if location params exist find nearest 3 locations and return in order of distance from the location params
+
+    # else show all venues on map
+    # button that takes in text field in view and points at this endpoint
+    # music_venues?address=1720nashlandchicagoil60622&latitude=23&longitude=423
+
+    if params[:search].present?
+      # @music_venues = MusicVenue.near(params[:search], 1, :order => :distance)
+      @music_venues = MusicVenue.search(params[:search])
+      .near(music_venue.address, 10)
+        .order("created_at DESC")
+
+    else
+    @music_venues = MusicVenue.paginate(page: params[:page], per_page: 5)
+    @hash = Gmaps4rails.build_markers(@music_venues) do |music_venue, marker|
+      marker.lat music_venue.latitude
+      marker.lng music_venue.longitude
+      marker.infowindow music_venue.name
+      marker.json({ title: music_venue.name })
+      end
+    end
   end
 
-#   def load_routers
-#     @music_venue = Gmaps4rails.build_markers(MusicVenue.all) do |plot, marker|
-#       puts 'marker' marker
-#        marker.lat plot.latitude
-#        marker.lng plot.longitude
+  def show
+    @venue = MusicVenue.find(params[:id])
+  end
 
-#        @status = rand(1..4)
-#        @battery = rand(10..90)
-#        @ip = "192.168."+rand(0..255).to_s+"."+rand(15..250).to_s
-#        @connected = rand(50..100)
+  def address
+    [street, city, state, country].compact.join(', ')
+  end
 
-#        if @status == 1
-#          url_alert = "/good.png"
-#          @status == "Normal"
-#        else
-#          url_alert = "/alert.png"
-#        end
+  def search
 
-#        marker.picture({
-#          "url" => url_alert,
-#          "width" => 35,
-#          "height" => 30
-#        })
-
-#        marker.infowindow render_to_string(:partial => "/routers/info",
-#          :locals => {:name => plot.name, :battery => @battery, :date => rand(6.months.ago..Time.now), :ip => @ip, :connected => @connected })
-#     end
-#   end
-
-#  def index
-#     load_routers
-
-#     @routers = Router.all
-#  end
+  end
 
 end
+
